@@ -163,8 +163,11 @@ void deleteDuck(Game *game, Duck *duck);
 void check_resize(XEvent *e);
 
 Ppmimage *backgroundImage = NULL;
+Ppmimage *backgroundTransImage = NULL;
 GLuint backgroundTexture;
+GLuint backgroundTransTexture;
 int background = 1;
+int trees = 1;
 
 int main(void)
 {
@@ -313,13 +316,20 @@ void init_opengl(void)
 	glDisable(GL_CULL_FACE);
 	//clear the screen
 	glClearColor(1.0, 1.0, 1.0, 1.0);
+	//Allows fonts
+	glEnable(GL_TEXTURE_2D);
+	initialize_fonts();
+	//
+	duckImage = ppm6GetImage("./images/duck.ppm");
 	backgroundImage = ppm6GetImage("./images/background.ppm");
+	backgroundTransImage = ppm6GetImage("./images/backgroundTrans.ppm");
 	
+	//create opengl texture elements
 	glGenTextures(1, &duckTexture);
 	glGenTextures(1, &duckSil);
+	glGenTextures(1, &backgroundTexture);
 	//-------------------------------------------------------------------
 	//duck sprite
-	duckImage = ppm6GetImage("./images/duck.ppm");
 	int w = duckImage->width;
 	int h = duckImage->height;
 	//added to test
@@ -345,19 +355,28 @@ void init_opengl(void)
 	GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
 	delete [] silhouetteData;
 	//-------------------------------------------------------------------
-	
-	//create opengl texture elements
-	glGenTextures(1, &backgroundTexture);
 	//background
 	glBindTexture(GL_TEXTURE_2D, backgroundTexture);
 	//
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, backgroundImage->width, backgroundImage->height, 0, GL_RGB, GL_UNSIGNED_BYTE, backgroundImage->data); 
-	//Set the screen background color
-	//glClearColor(0.1, 0.1, 0.1, 1.0);
-	glEnable(GL_TEXTURE_2D);
-	initialize_fonts();
+	//-------------------------------------------------------------------
+	//forest transparent part
+	//
+	glBindTexture(GL_TEXTURE_2D, backgroundTransTexture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	//must build a new set of data...
+	w = backgroundTransImage->width;
+	h = backgroundTransImage->height;
+	unsigned char *ftData = buildAlphaData(backgroundTransImage);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+				GL_RGBA, GL_UNSIGNED_BYTE, ftData);
+	delete [] ftData;
+	//-------------------------------------------------------------------
 }
 
 void makeDuck(Game *game, float x, float y)
@@ -558,6 +577,21 @@ int check_keys(XEvent *e, Game *game)
 			else
 				game->twoDuck = false;
 			game->oneDuck = false;
+		}
+		if(key == XK_3)
+		{
+			background ^= 1;
+			std::cout << "background: " << background << std::endl;
+		}
+		if(key == XK_4)
+		{
+			silhouette ^= 1;
+			std::cout << "silhouette: " << silhouette << std::endl;
+		}
+		if(key == XK_5)
+		{
+			trees ^= 1;
+			std::cout << "trees: " << trees << std::endl;
 		}
 	}
 	return 0;
@@ -800,9 +834,11 @@ void render(Game *game)
 			
 				//implement silhouette for the duck
 			
-				if (silhouette) 
+				if (!silhouette) 
 				{
 					glBindTexture(GL_TEXTURE_2D, duckTexture);
+				} else {	
+					glBindTexture(GL_TEXTURE_2D, duckSil);
 					glEnable(GL_ALPHA_TEST);
 					glAlphaFunc(GL_GREATER, 0.0f);
 					glColor4ub(255,255,255,255);
@@ -822,17 +858,17 @@ void render(Game *game)
 				}
 				glEnd();
 				glPopMatrix();
-				/*
+				
 				if (trees && silhouette) {
-					glBindTexture(GL_TEXTURE_2D, forestTransTexture);
+					glBindTexture(GL_TEXTURE_2D, backgroundTransTexture);
 					glBegin(GL_QUADS);
 					glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
-					glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
-					glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
-					glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
+					glTexCoord2f(0.0f, 0.0f); glVertex2i(0, WINDOW_HEIGHT);
+					glTexCoord2f(1.0f, 0.0f); glVertex2i(WINDOW_WIDTH, WINDOW_HEIGHT);
+					glTexCoord2f(1.0f, 1.0f); glVertex2i(WINDOW_WIDTH, 0);
 					glEnd();
 				}
-				*/
+				
 				glDisable(GL_ALPHA_TEST);
 			}
 //Fix these!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -845,7 +881,7 @@ void render(Game *game)
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_BLEND); 
 			glDisable(GL_BLEND);
-*/		
+		*/
 		}
 	}
 }
