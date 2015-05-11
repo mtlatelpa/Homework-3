@@ -164,10 +164,13 @@ void check_resize(XEvent *e);
 
 Ppmimage *backgroundImage = NULL;
 Ppmimage *backgroundTransImage = NULL;
+Ppmimage *gameoverbgImage = NULL;
 GLuint backgroundTexture;
 GLuint backgroundTransTexture;
+GLuint gameoverbgTexture;
 int background = 1;
 int trees = 1;
+bool gameover = false;
 
 int main(void)
 {
@@ -323,11 +326,13 @@ void init_opengl(void)
 	duckImage = ppm6GetImage("./images/duck.ppm");
 	backgroundImage = ppm6GetImage("./images/background.ppm");
 	backgroundTransImage = ppm6GetImage("./images/backgroundTrans.ppm");
+	gameoverbgImage = ppm6GetImage("./images/gameoverbg.ppm");
 	
 	//create opengl texture elements
 	glGenTextures(1, &duckTexture);
 	glGenTextures(1, &duckSil);
 	glGenTextures(1, &backgroundTexture);
+	glGenTextures(1, &gameoverbgTexture);
 	//-------------------------------------------------------------------
 	//duck sprite
 	int w = duckImage->width;
@@ -376,6 +381,13 @@ void init_opengl(void)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
 				GL_RGBA, GL_UNSIGNED_BYTE, ftData);
 	delete [] ftData;
+	//-------------------------------------------------------------------
+	//gameover
+	glBindTexture(GL_TEXTURE_2D, gameoverbgTexture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, gameoverbgImage->width, gameoverbgImage->height, 0, GL_RGB, GL_UNSIGNED_BYTE, gameoverbgImage->data); 
 	//-------------------------------------------------------------------
 }
 
@@ -537,6 +549,7 @@ int check_keys(XEvent *e, Game *game)
 		//You may check other keys here.
 		if(key == XK_1)
 		{
+		    	gameover = false;
 			while(d)
 			{
 				deleteDuck(game, d);
@@ -558,6 +571,7 @@ int check_keys(XEvent *e, Game *game)
 		}
 		if(key == XK_2)
 		{
+		    	gameover = false;
 			while(d)
 			{
 				deleteDuck(game, d);
@@ -592,6 +606,11 @@ int check_keys(XEvent *e, Game *game)
 		{
 			trees ^= 1;
 			std::cout << "trees: " << trees << std::endl;
+		}
+		if(key == XK_6)
+		{
+			gameover ^= 1;
+			std::cout << "gameover: " << gameover << std::endl;
 		}
 	}
 	return 0;
@@ -672,6 +691,15 @@ void render(Game *game)
 		glTexCoord2f(1.0f, 1.0f); glVertex2i(WINDOW_WIDTH, 0);
 		glEnd();
 	}
+			if(gameover) {
+				glBindTexture(GL_TEXTURE_2D, gameoverbgTexture);
+				glBegin(GL_QUADS);
+				glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+				glTexCoord2f(0.0f, 0.0f); glVertex2i(0, WINDOW_HEIGHT);
+				glTexCoord2f(1.0f, 0.0f); glVertex2i(WINDOW_WIDTH, WINDOW_HEIGHT);
+				glTexCoord2f(1.0f, 1.0f); glVertex2i(WINDOW_WIDTH, 0);
+				glEnd();
+			}
 
 	glDisable(GL_TEXTURE_2D);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -782,6 +810,7 @@ void render(Game *game)
 			}
 			game->oneDuck = false;
 			game->twoDuck = false;
+			gameover = true;
 			std::cout << "GAME OVER" << std::endl;
 		}
 		if(!d && game->oneDuck && game->duckCount < 10)
