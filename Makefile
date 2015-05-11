@@ -8,7 +8,7 @@ LFLAGS = $(LIB) -lrt -lX11 -lGLU -lGL -pthread -lm #-lXrandr
 all: duckhunt
 
 duckhunt: miguelT.cpp
-	g++ $(CFLAGS) duckhunt.cpp ppm.cpp -Wall -Wextra $(LFLAGS) -o duckhunt
+	g++ $(CFLAGS) miguelT.cpp ppm.cpp -Wall -Wextra $(LFLAGS) -o duckhunt
 
 clean:
 	rm -f duckhunt
