@@ -1,4 +1,6 @@
-// Jason Thai
+// Miguel Tlatelpa
+// Did background, transparent background, and gameover
+// still have more to do
 // Duck Hunt
 
 #include <iostream>
