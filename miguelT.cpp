@@ -164,6 +164,7 @@ void makeDuck(Game *game);
 void deleteDuck(Game *game, Duck *duck);
 void check_resize(XEvent *e);
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
 Ppmimage *backgroundImage = NULL;
 Ppmimage *backgroundTransImage = NULL;
 Ppmimage *gameoverbgImage = NULL;
@@ -173,6 +174,7 @@ GLuint gameoverbgTexture;
 int background = 1;
 int trees = 1;
 bool gameover = false;
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 int main(void)
 {
@@ -304,6 +306,7 @@ unsigned char *buildAlphaData(Ppmimage *img) {
 	return newdata;
 }
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
 void init_opengl(void)
 {
 	//OpenGL initialization
@@ -392,7 +395,7 @@ void init_opengl(void)
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, gameoverbgImage->width, gameoverbgImage->height, 0, GL_RGB, GL_UNSIGNED_BYTE, gameoverbgImage->data); 
 	//-------------------------------------------------------------------
 }
-
+//-----------------------------------------------------------------------------------------------------------------------------------------
 void makeDuck(Game *game, float x, float y)
 {
 	if(game->n >= MAX_DUCKS)
@@ -594,6 +597,7 @@ int check_keys(XEvent *e, Game *game)
 				game->twoDuck = false;
 			game->oneDuck = false;
 		}
+//-----------------------------------------------------------------------------------------------------------------------------------------
 		if(key == XK_3)
 		{
 			background ^= 1;
@@ -614,6 +618,7 @@ int check_keys(XEvent *e, Game *game)
 			gameover ^= 1;
 			std::cout << "gameover: " << gameover << std::endl;
 		}
+//-----------------------------------------------------------------------------------------------------------------------------------------
 	}
 	return 0;
 }
@@ -684,6 +689,7 @@ void render(Game *game)
 	//float wid = 120.0f;
 	//glColor3f(1.0,1.0,1.0);
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
 	if(background) {
 		glBindTexture(GL_TEXTURE_2D, backgroundTexture);
 		glBegin(GL_QUADS);
@@ -693,20 +699,21 @@ void render(Game *game)
 		glTexCoord2f(1.0f, 1.0f); glVertex2i(WINDOW_WIDTH, 0);
 		glEnd();
 	}
-			if(gameover) {
-				glBindTexture(GL_TEXTURE_2D, gameoverbgTexture);
-				glBegin(GL_QUADS);
-				glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
-				glTexCoord2f(0.0f, 0.0f); glVertex2i(0, WINDOW_HEIGHT);
-				glTexCoord2f(1.0f, 0.0f); glVertex2i(WINDOW_WIDTH, WINDOW_HEIGHT);
-				glTexCoord2f(1.0f, 1.0f); glVertex2i(WINDOW_WIDTH, 0);
-				glEnd();
-			}
+	if(gameover) {
+		glBindTexture(GL_TEXTURE_2D, gameoverbgTexture);
+		glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+		glTexCoord2f(0.0f, 0.0f); glVertex2i(0, WINDOW_HEIGHT);
+		glTexCoord2f(1.0f, 0.0f); glVertex2i(WINDOW_WIDTH, WINDOW_HEIGHT);
+		glTexCoord2f(1.0f, 1.0f); glVertex2i(WINDOW_WIDTH, 0);
+		glEnd();
+	}
 
 	glDisable(GL_TEXTURE_2D);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 	//Drawing Shapes
 	glColor3ub(255, 255, 255);
@@ -812,7 +819,9 @@ void render(Game *game)
 			}
 			game->oneDuck = false;
 			game->twoDuck = false;
+//-----------------------------------------------------------------------------------------------------------------------------------------
 			gameover = true;
+//-----------------------------------------------------------------------------------------------------------------------------------------
 			std::cout << "GAME OVER" << std::endl;
 		}
 		if(!d && game->oneDuck && game->duckCount < 10)
@@ -890,6 +899,7 @@ void render(Game *game)
 				glEnd();
 				glPopMatrix();
 				
+//-----------------------------------------------------------------------------------------------------------------------------------------
 				if (trees && silhouette) {
 					glBindTexture(GL_TEXTURE_2D, backgroundTransTexture);
 					glBegin(GL_QUADS);
@@ -901,6 +911,7 @@ void render(Game *game)
 				}
 				
 				glDisable(GL_ALPHA_TEST);
+//-----------------------------------------------------------------------------------------------------------------------------------------
 			}
 //Fix these!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //Possible issue when changing duck direction
